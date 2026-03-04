@@ -10,6 +10,7 @@ async function seed(): Promise<void> {
     create: {
       discordId: "000000000000000000",
       name: "NOCTA Dev Server",
+      ownerId: "000000000000000001",
       settings: {
         create: {
           prefix: "!",
