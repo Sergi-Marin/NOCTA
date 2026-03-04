@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Guild ────────────────────────────────────────────────────────────────────
+
+model Guild {
+  id        String   @id @default(cuid())
+  discordId String   @unique
+  name      String
+  iconUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  settings   GuildSettings?
+  members    GuildMember[]
+  infractions Infraction[]
+
+  @@map("guilds")
+}
+
+model GuildSettings {
+  guildId        String  @id
+  prefix         String  @default("!")
+  language       String  @default("en")
+  logChannelId   String?
+  welcomeChannelId String?
+  welcomeMessage String?
+  modRoleId      String?
+  adminRoleId    String?
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@map("guild_settings")
+}
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  discordId     String   @unique
+  username      String
+  discriminator String   @default("0")
+  avatarUrl     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  guildMemberships    GuildMember[]
+  issuedInfractions   Infraction[] @relation("ModeratorInfractions")
+  receivedInfractions Infraction[] @relation("TargetInfractions")
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  MOD
+  ADMIN
+  OWNER
+}
+
+model GuildMember {
+  userId  String
+  guildId String
+  role    UserRole @default(USER)
+  joinedAt DateTime @default(now())
+  xp      Int      @default(0)
+  level   Int      @default(0)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@id([userId, guildId])
+  @@map("guild_members")
+}
+
+// ─── Moderation ───────────────────────────────────────────────────────────────
+
+enum InfractionType {
+  WARN
+  MUTE
+  KICK
+  BAN
+  UNBAN
+  UNMUTE
+}
+
+model Infraction {
+  id              String         @id @default(cuid())
+  guildId         String
+  targetUserId    String
+  moderatorUserId String
+  type            InfractionType
+  reason          String?
+  expiresAt       DateTime?
+  createdAt       DateTime       @default(now())
+
+  guild     Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  target    User  @relation("TargetInfractions", fields: [targetUserId], references: [id])
+  moderator User  @relation("ModeratorInfractions", fields: [moderatorUserId], references: [id])
+
+  @@index([guildId, targetUserId])
+  @@index([guildId, type])
+  @@map("infractions")
+}

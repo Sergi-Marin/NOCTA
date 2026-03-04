@@ -1,0 +1,5 @@
+packages:
+  - "bot"
+  - "web"
+  - "shared"
+  - "database"
