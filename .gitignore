@@ -13,8 +13,9 @@ build/
 .env.local
 .env.*.local
 
-# Prisma
-database/prisma/migrations/
+# Prisma (migrations must be committed — only ignore the local dev db)
+database/prisma/dev.db
+database/prisma/dev.db-journal
 
 # Logs
 *.log

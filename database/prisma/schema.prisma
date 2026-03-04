@@ -7,36 +7,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─── Guild ────────────────────────────────────────────────────────────────────
+// ─── Enums ────────────────────────────────────────────────────────────────────
 
-model Guild {
-  id        String   @id @default(cuid())
-  discordId String   @unique
-  name      String
-  iconUrl   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  settings   GuildSettings?
-  members    GuildMember[]
-  infractions Infraction[]
-
-  @@map("guilds")
+enum Plan {
+  FREE
+  PRO
+  PREMIUM
 }
 
-model GuildSettings {
-  guildId        String  @id
-  prefix         String  @default("!")
-  language       String  @default("en")
-  logChannelId   String?
-  welcomeChannelId String?
-  welcomeMessage String?
-  modRoleId      String?
-  adminRoleId    String?
+enum UserRole {
+  USER
+  MOD
+  ADMIN
+  OWNER
+}
 
-  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
-
-  @@map("guild_settings")
+enum InfractionType {
+  WARN
+  MUTE
+  KICK
+  BAN
+  UNBAN
+  UNMUTE
 }
 
 // ─── User ─────────────────────────────────────────────────────────────────────
@@ -47,30 +39,63 @@ model User {
   username      String
   discriminator String   @default("0")
   avatarUrl     String?
+  email         String?  @unique
+  plan          Plan     @default(FREE)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   guildMemberships    GuildMember[]
-  issuedInfractions   Infraction[] @relation("ModeratorInfractions")
-  receivedInfractions Infraction[] @relation("TargetInfractions")
+  subscriptions       Subscription[]
+  issuedInfractions   Infraction[]   @relation("ModeratorInfractions")
+  receivedInfractions Infraction[]   @relation("TargetInfractions")
 
   @@map("users")
 }
 
-enum UserRole {
-  USER
-  MOD
-  ADMIN
-  OWNER
+// ─── Guild ────────────────────────────────────────────────────────────────────
+
+model Guild {
+  id            String   @id @default(cuid())
+  discordId     String   @unique
+  name          String
+  iconUrl       String?
+  ownerId       String
+  config        Json     @default("{}")
+  activeModules String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  settings      GuildSettings?
+  members       GuildMember[]
+  infractions   Infraction[]
+  subscriptions Subscription[]
+  voiceSessions VoiceSession[]
+
+  @@map("guilds")
+}
+
+model GuildSettings {
+  guildId          String  @id
+  prefix           String  @default("!")
+  language         String  @default("en")
+  logChannelId     String?
+  welcomeChannelId String?
+  welcomeMessage   String?
+  modRoleId        String?
+  adminRoleId      String?
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@map("guild_settings")
 }
 
 model GuildMember {
-  userId  String
-  guildId String
-  role    UserRole @default(USER)
+  userId   String
+  guildId  String
+  role     UserRole @default(USER)
   joinedAt DateTime @default(now())
-  xp      Int      @default(0)
-  level   Int      @default(0)
+  xp       Int      @default(0)
+  level    Int      @default(0)
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
@@ -79,16 +104,46 @@ model GuildMember {
   @@map("guild_members")
 }
 
-// ─── Moderation ───────────────────────────────────────────────────────────────
+// ─── Subscription ─────────────────────────────────────────────────────────────
 
-enum InfractionType {
-  WARN
-  MUTE
-  KICK
-  BAN
-  UNBAN
-  UNMUTE
+model Subscription {
+  id               String    @id @default(cuid())
+  userId           String
+  guildId          String
+  plan             Plan
+  stripeCustomerId String?
+  stripeSubId      String?   @unique
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, guildId])
+  @@index([stripeCustomerId])
+  @@index([expiresAt])
+  @@map("subscriptions")
 }
+
+// ─── Voice Session ────────────────────────────────────────────────────────────
+
+model VoiceSession {
+  id               String    @id @default(cuid())
+  guildId          String
+  userId           String?
+  channelId        String?
+  startedAt        DateTime  @default(now())
+  endedAt          DateTime?
+  interactionCount Int       @default(0)
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, startedAt])
+  @@map("voice_sessions")
+}
+
+// ─── Moderation ───────────────────────────────────────────────────────────────
 
 model Infraction {
   id              String         @id @default(cuid())
