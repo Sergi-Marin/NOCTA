@@ -40,9 +40,11 @@ model User {
   discriminator String   @default("0")
   avatarUrl     String?
   email         String?  @unique
-  plan          Plan     @default(FREE)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  plan             Plan     @default(FREE)
+  stripeCustomerId String?  @unique
+  stripeSubId      String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   guildMemberships    GuildMember[]
   subscriptions       Subscription[]

@@ -121,6 +121,9 @@ importers:
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
+      stripe:
+        specifier: ^16.0.0
+        version: 16.12.0
       tailwind-merge:
         specifier: ^2.3.0
         version: 2.6.1
@@ -1227,6 +1230,10 @@ packages:
     resolution: {integrity: sha512-BrpvfNAE3dcvq7ll3xVumzjKjZQ5tI1sEUIKr3Uoks0XUl45St3FlatVqef9prk4jRDzhW6WZg+3bk93y6pLjA==}
     engines: {node: '>=6'}
 
+  stripe@16.12.0:
+    resolution: {integrity: sha512-H7eFVLDxeTNNSn4JTRfL2//LzCbDrMSZ+2q1c7CanVWgK2qIW5TwS+0V7N9KcKZZNpYh/uCqK0PyZh/2UsaAtQ==}
+    engines: {node: '>=12.*'}
+
   styled-jsx@5.1.1:
     resolution: {integrity: sha512-pW7uC1l4mBZ8ugbiZrcIsiIvVx1UmTfw7UkC3Um2tmfUq9Bhk8IiyEIPl6F8agHgjzku6j0xQEZbfA5uSgSaCw==}
     engines: {node: '>= 12.0.0'}
@@ -2319,6 +2326,11 @@ snapshots:
       safe-buffer: 5.2.1
 
   strip-final-newline@2.0.0: {}
+
+  stripe@16.12.0:
+    dependencies:
+      '@types/node': 20.19.35
+      qs: 6.15.0
 
   styled-jsx@5.1.1(react@18.3.1):
     dependencies:
