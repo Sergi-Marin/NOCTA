@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { Events } from "discord.js";
 import { NoctaClient } from "./client.js";
 import { AIEngine, ModuleLoader, createVoicePipeline } from "./core/index.js";
+import { register as registerAssistant } from "./modules/assistant/index.js";
 import type { Command } from "./client.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -53,6 +54,11 @@ client.once(Events.ClientReady, (c) => {
   console.log(
     `[Engines] ModuleLoader ready — ${client.moduleLoader.discoverAvailable().length} module(s) on disk`,
   );
+
+  // Auto-load built-in FREE modules that are available to every guild
+  void registerAssistant(client.moduleLoader).then(() => {
+    console.log("[Modules] assistant auto-loaded");
+  });
 
   // Voice pipeline (requires Picovoice + ElevenLabs)
   const voiceReady =

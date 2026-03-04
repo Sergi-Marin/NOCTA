@@ -1,4 +1,5 @@
 import {
+  Bot,
   Mic,
   Shield,
   UserPlus,
@@ -19,6 +20,14 @@ export interface ModuleDefinition {
 }
 
 export const MODULES: ModuleDefinition[] = [
+  {
+    id: "assistant",
+    name: "AI Assistant",
+    description:
+      "General-knowledge questions answered by Claude. 10 queries/hour on Free, unlimited on Pro+.",
+    icon: Bot,
+    requiredPlan: "FREE",
+  },
   {
     id: "voice",
     name: "Voice Assistant",
