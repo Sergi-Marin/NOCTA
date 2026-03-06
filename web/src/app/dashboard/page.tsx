@@ -52,7 +52,7 @@ export default async function DashboardPage() {
                 No servers found with NOCTA installed. Add NOCTA to a server first.
               </p>
               <a
-                href={`https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&permissions=8&scope=bot%20applications.commands`}
+                href={process.env.DISCORD_BOT_INVITE_URL ?? "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-500 transition-colors px-4 py-2.5 text-sm font-semibold text-white"
